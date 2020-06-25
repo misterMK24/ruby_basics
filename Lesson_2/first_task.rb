@@ -13,6 +13,6 @@ months_hash = {
   december: 31
 }
 
-months_hash.select{ |key, value| value == 30}.each_key do |key|
+months_hash.select{ |key, value| value == 30 }.each_key do |key|
   puts "#{key}"
 end

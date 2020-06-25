@@ -9,15 +9,17 @@ loop do
   price = gets.chomp.to_f
   print "Введите количество купленного товара: "
   amount = gets.chomp.to_f
-  purchases[product] = {price => amount}
+  purchases[product] = {
+    price: price,
+    amount: amount
+  }
 end
 
 purchases.each do |key, value|
-  print "Товар: #{key}, "
-  value.each do |k, v|
-    total_price += k * v
-    puts "Цена за единицу: #{k}, Количество: #{v}, Итоговая сумма: #{k * v}"
-  end
+  price_for_one = value[:price]
+  amount_for_one = value[:amount]
+  puts "Товар: #{key}, Цена за единицу: #{price_for_one}, Количество: #{amount_for_one}, Итоговая сумма: #{price_for_one * amount_for_one}"
+  total_price += price_for_one * amount_for_one
 end
 
 puts "Итоговая стоимость всех продуктов составляет: #{total_price}"
