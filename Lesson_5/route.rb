@@ -7,6 +7,11 @@ class Route
 
   attr_reader :stations
 
+  def initialize(first_station, last_station)
+    @stations = [first_station, last_station]
+    register_instance
+  end
+
   def add_station(station)
     @stations.insert(-2, station) unless @stations.include? (station)
   end
@@ -17,14 +22,5 @@ class Route
 
   def show_stations
     @stations.each { |station| puts station.name }
-  end
-
-  private
-
-  self.declare_instance_counter
-
-  def initialize(first_station, last_station)
-    @stations = [first_station, last_station]
-    register_instance
   end
 end

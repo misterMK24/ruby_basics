@@ -9,7 +9,14 @@ class Station
   attr_reader :name, :trains
 
   def self.all
-    @@stations.each { |station| puts station }
+    @@stations
+  end
+
+  def initialize(name)
+    @name = name
+    @trains = []
+    @@stations << self
+    register_instance
   end
 
   def add_train(train)
@@ -25,14 +32,5 @@ class Station
 
   private
 
-  self.declare_instance_counter
-
   @@stations = []
-
-  def initialize(name)
-    @name = name
-    @trains = []
-    @@stations << self
-    register_instance
-  end
 end

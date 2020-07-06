@@ -9,8 +9,17 @@ class Train
   attr_reader :number
 
   def self.find(number)
-    result = @@trains.select { |train| train.number == number }
-    result.empty? ? nil : result
+    @@trains.select { |key, value| key == number.to_sym }
+  end
+
+  def initialize(number)
+    @number = number.to_sym
+    @speed = 0
+    @route = nil
+    @carriages = []
+    @current_station = nil
+    @@trains[@number] = self
+    register_instance
   end
 
   def increase_speed(speed)
@@ -83,17 +92,5 @@ class Train
 
   private
 
-  self.declare_instance_counter
-
-  @@trains = []
-
-  def initialize(number)
-    @number = number
-    @speed = 0
-    @route = nil
-    @carriages = []
-    @current_station = nil
-    @@trains << self
-    register_instance
-  end
+  @@trains = {}
 end
