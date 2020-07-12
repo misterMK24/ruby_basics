@@ -293,7 +293,7 @@ private
       puts TRAIN_MENU[:passenger_carriage_menu]
       choice = gets.chomp
       case choice
-      when "1" then current_carriage.take_seat
+      when "1" then current_carriage.decrease_availability
       when "2" then sub_train_interface(current_train)
       end
     else
@@ -301,36 +301,25 @@ private
       choice = gets.chomp
       case choice
       when "1"
-        print "Введите объем (максимум - #{current_carriage.available_volume}): "
-        volume = gets.chomp.to_i
-        current_carriage.occupy_volume(volume)
+        print "Введите объем (максимум - #{current_carriage.available_measure}): "
+        value = gets.chomp.to_i
+        current_carriage.decrease_availability(value)
       when "2" then sub_train_interface(current_train)
       end
     end
   end
 
   def each_carriage_interface(current_train)
-    if current_train.instance_of? (PassengerTrain)
-      current_train.each_carriage { |carriage, index|
-        puts "Номер вагона: #{index}, Тип: #{carriage.type}, " \
-        "Свободных мест: #{carriage.available_seats}, Занято: #{carriage.occupied_seats}"  }
-    else
-      current_train.each_carriage { |carriage, index|
-        puts "Номер вагона: #{index}, Тип: #{carriage.type}, " \
-          "Свободно объема: #{carriage.available_volume}, Занято объема: #{carriage.occupied_volume}" }
-    end
+    current_train.each_carriage { |carriage, index|
+    puts "Номер вагона: #{index}, Тип: #{carriage.type}, " \
+        "Свободное пространство: #{carriage.available_measure}, Занято: #{carriage.occupied_measure}"  }
   end
 
   def add_carriage_interface(current_train)
-    if current_train.instance_of? (PassengerTrain)
-      print "Введите количество мест: "
-      total_seats = gets.chomp.to_i
-      current_train.add_carriage(PassengerCarriage.new(total_seats))
-    else
-      print "Введите объем вагона: "
-      total_volume = gets.chomp.to_i
-      current_train.add_carriage(CargoCarriage.new(total_volume))
-    end
+    print "Введите вместительность вагона: "
+    total_measure = gets.chomp.to_i
+    current_train.add_carriage(PassengerCarriage.new(total_measure)) if current_train.is_a? (PassengerTrain)
+    current_train.add_carriage(CargoCarriage.new(total_measure)) if current_train.is_a? (CargoTrain)
   end
 
   def station_interface
