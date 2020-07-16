@@ -1,6 +1,5 @@
-require_relative "route"
-require_relative "station"
-
+require_relative 'route'
+require_relative 'station'
 
 class Train
   # include Manufacturer
@@ -8,8 +7,16 @@ class Train
 
   attr_reader :number, :type, :carriages
 
+  class << self
+    def add_train(number, train)
+      @trains[number] = train
+    end
+  end
+
+  @trains = {}
+
   def self.find(number)
-    @@trains.select { |key, value| key == number.to_sym }
+    @trains.select { |key| key == number.to_sym }
   end
 
   def initialize(number)
@@ -18,7 +25,7 @@ class Train
     @route = nil
     @carriages = []
     @current_station = nil
-    @@trains[@number] = self
+    self.class.add_train(@number, self)
     validate_number!
     # register_instance
   end
@@ -58,6 +65,7 @@ class Train
   def go_forward
     validate_route!
     raise "You're on a last station" unless next_station
+
     next_station_index = current_station_index + 1
     @current_station.send_train(self, @route.stations[next_station_index])
     # puts "Поезд перемещен на станцию: #{self.current_station.name}"
@@ -66,6 +74,7 @@ class Train
   def go_back
     validate_route!
     raise "You're on a first station" unless previous_station
+
     next_station_index = current_station_index - 1
     @current_station.send_train(self, @route.stations[next_station_index])
     # puts "Поезд перемещен на станцию: #{self.current_station.name}"
@@ -77,18 +86,18 @@ class Train
   attr_reader :current_station, :speed
   attr_writer :type
 
-  NUMBER_FORMAT = /^.{3}[-]?.{2}$/
+  NUMBER_FORMAT = /^.{3}[-]?.{2}$/.freeze
 
   def valid?
     validate_number!
     true
-  rescue
+  rescue StandardError
     false
   end
 
   def validate_number!
-    raise "Number can't be empty" if @number.length == 0
-    raise "Number has invalid format" if @number !~ NUMBER_FORMAT
+    raise "Number can't be empty" if @number.empty?
+    raise 'Number has invalid format' if @number !~ NUMBER_FORMAT
   end
 
   def validate_route!
@@ -96,11 +105,11 @@ class Train
   end
 
   def validate_speed!
-    raise "Please, stop train!" unless @speed.zero?
+    raise 'Please, stop train!' unless @speed.zero?
   end
 
   def validate_carriage!
-    raise "Train is empty!" if @carriages.empty?
+    raise 'Train is empty!' if @carriages.empty?
   end
 
   def current_station_index
@@ -109,15 +118,13 @@ class Train
 
   def previous_station
     return nil if @current_station == @route.stations.first
+
     @route.stations[current_station_index - 1]
   end
 
   def next_station
     return nil if @current_station == @route.stations.last
+
     @route.stations[current_station_index + 1]
   end
-
-  private
-
-  @@trains = {}
 end

@@ -1,9 +1,7 @@
-require_relative "carriage"
-
+require_relative 'carriage'
 
 class CargoCarriage < Carriage
-
-  def initialize(type = "cargo", total_measure)
+  def initialize(total_measure, type = 'cargo')
     super
   end
 

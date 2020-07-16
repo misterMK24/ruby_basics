@@ -1,7 +1,7 @@
 class Carriage
   attr_reader :type, :occupied_measure
 
-  def initialize(type = nil, total_measure = nil)
+  def initialize(total_measure = nil, type = nil)
     @type = type
     @total_measure = total_measure
     @occupied_measure = 0

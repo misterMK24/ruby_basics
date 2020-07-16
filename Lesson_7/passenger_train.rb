@@ -1,14 +1,14 @@
-require_relative "train"
-
+require_relative 'train'
 
 class PassengerTrain < Train
   def initialize(number)
-    @type = "passenger"
+    @type = 'passenger'
     super
   end
 
   def add_carriage(carriage)
     return nil unless is_passenger?(carriage)
+
     super
   end
 

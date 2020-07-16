@@ -1,5 +1,4 @@
-require_relative "train"
-
+require_relative 'train'
 
 class Station
   # include InstanceCounter
@@ -7,14 +6,22 @@ class Station
   attr_reader :trains
   attr_accessor :name
 
+  @stations = []
+
+  class << self
+    def add_station(station)
+      @stations << station
+    end
+  end
+
   def self.all
-    @@stations
+    @stations
   end
 
   def initialize(name)
     @name = name
     @trains = []
-    @@stations << self
+    self.class.add_station(self)
     # register_instance
     validate_name!
   end
@@ -40,16 +47,15 @@ class Station
     validate_name!
     true
   rescue
+    puts 'Error'
     false
   end
 
   def validate_name!
-    raise "Name can't be empty" if @name.length == 0
+    raise "Name can't be empty" if @name.empty?
   end
 
   def validate_train_existence!(train)
     raise "train ins't on a station now" unless @trains.include?(train)
   end
-
-  @@stations = []
 end

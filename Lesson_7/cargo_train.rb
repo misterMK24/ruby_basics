@@ -1,11 +1,12 @@
 class CargoTrain < Train
   def initialize(number)
-    @type = "cargo"
+    @type = 'cargo'
     super
   end
 
   def add_carriage(carriage)
     return nil unless is_cargo?(carriage)
+
     super
   end
 

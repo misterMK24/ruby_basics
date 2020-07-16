@@ -1,8 +1,7 @@
 # require_relative "instance_counter"
 
-
 class Route
-  #также оставим все методы и переменные в публичном доступе, которые используются в Main классе. Initialize всегда будет в private.
+  # также оставим все методы и переменные в публичном доступе, которые используются в Main классе.
   # include InstanceCounter
 
   attr_reader :stations
@@ -13,7 +12,7 @@ class Route
   end
 
   def add_station(station)
-    @stations.insert(-2, station) unless @stations.include? (station)
+    @stations.insert(-2, station) unless @stations.include?(station)
   end
 
   def delete_station(station)
