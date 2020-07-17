@@ -35,6 +35,7 @@ class Main
     '0. Выйти из программы'
   ].freeze
   STATION_MENU = [
+    'Выберите необходимое действие:',
     '1. Создать станцию',
     '2. Просмотреть список всех станций',
     '3. Просмотреть список поездов на станции',
@@ -44,17 +45,20 @@ class Main
   TRAIN_MENU =
     {
       main_menu: [
+        'Выберите необходимое действие:',
         '1. Создать поезд',
         '2. Выбрать текущий поезд и изменить данные',
         '9. Главное меню',
         '0. Выйти из программы'
       ],
       train_type_menu: [
+        'Выберите тип поезда: ',
         '1. Пассажирский',
         '2. Грузовой',
         '3. Предыдущее меню'
       ],
       sub_train_menu: [
+        'Выберите необходимое действие: ',
         '1. Назначить маршрут поезду',
         '2. Добавить вагон',
         '3. Убрать вагон',
@@ -79,12 +83,14 @@ class Main
   ROUTE_MENU =
     {
       main_menu: [
+        'Выберите необходимое действие:',
         '1. Создать маршрут',
         '2. Редактировать маршрут',
         '9. Главное меню меню',
         '0. Выйти из программы'
       ],
       sub_route_menu: [
+        'Выберите необходимое действие: ',
         '1. Добавить станцию',
         '2. Убрать станцию',
         '3. Предыдущее меню'
@@ -168,23 +174,19 @@ class Main
     end
   end
 
+  def route_creation
+    if @stations.empty? || @stations.size == 1
+      puts 'У Вас нет созданных станций или их меньше двух!'
+    else
+      @routes << Route.new(choose_station, choose_station)
+    end
+  end
+
   def route_interface
     loop do
-      puts 'Выберите необходимое действие:'
       puts ROUTE_MENU[:main_menu]
-      choice = gets.chomp
-      case choice
-      when '1'
-        if @stations.empty? || @stations.size == 1
-          puts 'У Вас нет созданных станций или их меньше двух!'
-          next
-        else
-          puts 'Выберите первую и последнюю станции: '
-          first_station = choose_station
-          last_station = choose_station
-          @routes << Route.new(first_station, last_station)
-          puts 'Маршрут создан успешно'
-        end
+      case gets.chomp
+      when '1' then route_creation
       when '2'
         next if routes_are_empty?
 
@@ -194,58 +196,59 @@ class Main
         sub_route_interface(current_route)
       when '9' then menu
       when '0' then exit
-      else puts 'Вы ввели некорректно данные, повторите ввод!'
       end
     end
   end
 
+  def add_station_on_route(current_route)
+    current_station = choose_station
+    return unless current_station
+
+    current_route.add_station(current_station)
+  end
+
+  def delete_station_on_route(current_route)
+    current_route.each_station { |station, index| puts "#{index}: #{station.name}" }
+    current_station = current_route.stations[gets.chomp.to_i - 1]
+    return unless current_route.stations.include? current_station
+
+    current_route.delete_station(current_station)
+  end
+
   def sub_route_interface(current_route)
     loop do
-      puts 'Выберите необходимое действие: '
       puts ROUTE_MENU[:sub_route_menu]
-      choice = gets.chomp
-      case choice
-      when '1'
-        current_station = choose_station
-        next unless current_station
-
-        current_route.add_station(current_station)
-      when '2'
-        puts 'Выберите станцию: '
-        current_route.stations.each.with_index(1) { |station, index| puts "#{index}: #{station.name}" }
-        current_station = current_route.stations[gets.chomp.to_i - 1]
-        next unless current_route.stations.include? current_station
-
-        current_route.delete_station(current_station)
+      case gets.chomp
+      when '1' then add_station_on_route(current_route)
+      when '2' then delete_station_on_route(current_route)
       when '3' then route_interface
-      else puts 'Вы ввели некорректно данные, повторите ввод!'
       end
+    end
+  end
+
+  def train_creation
+    puts TRAIN_MENU[:train_type_menu]
+    train_type = gets.chomp
+    train_interface if train_type == '3'
+    attempt = 3
+    begin
+      print 'Введите номер поезда: '
+      @trains << PassengerTrain.new(gets.chomp) if train_type == '1'
+      @trains << CargoTrain.new(gets.chomp) if train_type == '2'
+      puts 'Поезд успешно создан!'
+    rescue RuntimeError
+      attempt -= 1
+      puts "Вы ввели некорректный формат номера поезда, повторите попытку. Осталось попыток: #{attempt}"
+      retry if attempt.positive?
     end
   end
 
   def train_interface
     loop do
-      puts 'Выберите необходимое действие:'
       puts TRAIN_MENU[:main_menu]
       choice = gets.chomp
       case choice
-      when '1'
-        puts 'Выберите тип поезда: '
-        puts TRAIN_MENU[:train_type_menu]
-        train_type = gets.chomp
-        train_interface if train_type == '3'
-        attempt = 3
-        begin
-          print 'Введите номер поезда: ' unless train_type == '3'
-          @trains << PassengerTrain.new(gets.chomp) if train_type == '1'
-          @trains << CargoTrain.new(gets.chomp) if train_type == '2'
-          puts 'Поезд успешно создан!'
-        rescue RuntimeError
-          attempt -= 1
-          puts "Вы ввели некорректный формат номера поезда, повторите попытку. Осталось попыток: #{attempt}"
-          retry if attempt.positive?
-          next
-        end
+      when '1' then train_creation
       when '2'
         next if trains_are_empty?
 
@@ -255,29 +258,22 @@ class Main
         sub_train_interface(current_train)
       when '9' then menu
       when '0' then exit
-      else puts 'Вы ввели некорректно данные, повторите ввод!'
       end
     end
   end
 
   def sub_train_interface(current_train)
     loop do
-      puts 'Выберите необходимое действие: '
       puts TRAIN_MENU[:sub_train_menu]
-      choice = gets.chomp
-      case choice
+      case gets.chomp
       when '1'
         current_route = choose_route
         next unless current_route
 
         current_train.add_route(current_route)
         current_route.show_stations
-      when '2'
-        add_carriage_interface(current_train)
-        puts 'Вагон успешно добавлен!'
-      when '3'
-        current_train.delete_carriage
-        puts 'Вагон успешно удален!'
+      when '2' then add_carriage_interface(current_train)
+      when '3' then current_train.delete_carriage
       when '4' then each_carriage_interface(current_train)
       when '5' then edit_carriage_interface(current_train)
       when '6' then current_train.go_forward
@@ -286,31 +282,32 @@ class Main
       when '9' then train_interface
       when '10' then menu
       when '0' then exit
-      else puts 'Вы ввели некорректно данные, повторите ввод!'
       end
+    end
+  end
+
+  def edit_passenger_carriage(current_carriage, current_train)
+    puts TRAIN_MENU[:passenger_carriage_menu]
+    case gets.chomp
+    when '1' then current_carriage.decrease_availability
+    when '2' then sub_train_interface(current_train)
+    end
+  end
+
+  def edit_cargo_carriage(current_carriage, current_train)
+    puts TRAIN_MENU[:cargo_carriage_menu]
+    case gets.chomp
+    when '1'
+      print "Введите объем (максимум - #{current_carriage.available_measure}): "
+      current_carriage.decrease_availability(gets.chomp.to_i)
+    when '2' then sub_train_interface(current_train)
     end
   end
 
   def edit_carriage_interface(current_train)
     current_carriage = choose_carriage(current_train)
-    if current_carriage.instance_of? PassengerCarriage
-      puts TRAIN_MENU[:passenger_carriage_menu]
-      choice = gets.chomp
-      case choice
-      when '1' then current_carriage.decrease_availability
-      when '2' then sub_train_interface(current_train)
-      end
-    else
-      puts TRAIN_MENU[:cargo_carriage_menu]
-      choice = gets.chomp
-      case choice
-      when '1'
-        print "Введите объем (максимум - #{current_carriage.available_measure}): "
-        value = gets.chomp.to_i
-        current_carriage.decrease_availability(value)
-      when '2' then sub_train_interface(current_train)
-      end
-    end
+    edit_passenger_carriage(current_carriage, current_train) if current_carriage.instance_of? PassengerCarriage
+    edit_cargo_carriage(current_carriage, current_train) if current_carriage.instance_of? CargoCarriage
   end
 
   def each_carriage_interface(current_train)
@@ -322,39 +319,45 @@ class Main
 
   def add_carriage_interface(current_train)
     print 'Введите вместительность вагона: '
-    total_measure = gets.chomp.to_i
-    current_train.add_carriage(PassengerCarriage.new(total_measure)) if current_train.is_a? PassengerTrain
-    current_train.add_carriage(CargoCarriage.new(total_measure)) if current_train.is_a? CargoTrain
+    current_train.add_carriage(PassengerCarriage.new(gets.chomp.to_i)) if current_train.is_a? PassengerTrain
+    current_train.add_carriage(CargoCarriage.new(gets.chomp.to_i)) if current_train.is_a? CargoTrain
+    puts 'Вагон успешно добавлен!'
+  end
+
+  def station_creation
+    print 'Введите наименование станции: '
+    station_name = gets.chomp
+    if @stations.any? { |station| station.name == station_name }
+      puts 'Станция уже существует'
+    else
+      @stations << Station.new(station_name)
+      puts 'Станция успешно создана!'
+    end
+  end
+
+  def print_station
+    return if stations_are_empty?
+
+    @stations.each.with_index(1) { |station, index| puts "#{index}: #{station.name}" }
+  end
+
+  def print_trains
+    return if stations_are_empty?
+
+    choose_station.each_train do |train|
+      puts "Номер поезда: #{train.number}. Тип: #{train.type}. Количество вагонов: #{train.carriages.size}"
+    end
   end
 
   def station_interface
     loop do
-      puts 'Выберите необходимое действие:'
       puts STATION_MENU
-      choice = gets.chomp
-      case choice
-      when '1'
-        print 'Введите наименование станции: '
-        station_name = gets.chomp
-        if @stations.any? { |station| station.name == station_name }
-          puts 'Станция уже существует'
-          next
-        else
-          @stations << Station.new(station_name)
-        end
-      when '2'
-        next if stations_are_empty?
-
-        @stations.each.with_index(1) { |station, index| puts "#{index}: #{station.name}" }
-      when '3'
-        next if stations_are_empty?
-
-        choose_station.each_train do |train|
-          puts "Номер поезда: #{train.number}. Тип: #{train.type}. Количество вагонов: #{train.carriages.size}"
-        end
+      case gets.chomp
+      when '1' then station_creation
+      when '2' then print_station
+      when '3' then print_trains
       when '9' then menu
       when '0' then exit
-      else puts 'Вы ввели некорректно данные, повторите ввод!'
       end
     end
   end

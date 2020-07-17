@@ -58,7 +58,7 @@ class Train
     route.stations.first.add_train(self)
   end
 
-  def set_current_station(station)
+  def current_station_set(station)
     @current_station = station
   end
 

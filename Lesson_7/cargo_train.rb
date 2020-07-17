@@ -1,11 +1,13 @@
 class CargoTrain < Train
+  @trains = {}
+
   def initialize(number)
     @type = 'cargo'
     super
   end
 
   def add_carriage(carriage)
-    return nil unless is_cargo?(carriage)
+    return nil unless cargo?(carriage)
 
     super
   end
@@ -13,7 +15,7 @@ class CargoTrain < Train
   private
 
   # внутренний метод, необходимый для работы в самом классе.
-  def is_cargo?(carriage)
+  def cargo?(carriage)
     carriage.instance_of?(CargoCarriage)
   end
 end

@@ -28,7 +28,7 @@ class Station
 
   def add_train(train)
     @trains << train
-    train.set_current_station(self)
+    train.current_station_set(self)
   end
 
   def send_train(train, next_station)
@@ -46,7 +46,7 @@ class Station
   def valid?
     validate_name!
     true
-  rescue
+  rescue StandardError
     puts 'Error'
     false
   end

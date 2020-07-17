@@ -22,4 +22,8 @@ class Route
   def show_stations
     @stations.each { |station| puts station.name }
   end
+
+  def each_station
+    @stations.each.with_index(1) { |station, index| yield(station, index) }
+  end
 end
