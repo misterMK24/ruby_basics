@@ -1,0 +1,126 @@
+require_relative 'route'
+require_relative 'station'
+require_relative 'accessors_module'
+require_relative 'validation_module'
+
+class Train
+  # include Manufacturer
+  # include InstanceCounter
+  include Validation
+  extend Accessors
+
+  strong_attr_accessor :number, Symbol
+  attr_reader :type, :carriages
+
+  NUMBER_FORMAT = /^.{3}[-]?.{2}$/.freeze
+
+  validate :number, :presence
+  validate :number, :format, NUMBER_FORMAT
+
+  class << self
+    def add_train(number, train)
+      @trains[number] = train
+    end
+  end
+
+  @trains = {}
+
+  def self.find(number)
+    @trains.select { |key| key == number.to_sym }
+  end
+
+  def initialize(number)
+    self.number = number.to_sym
+    @speed = 0
+    @route = nil
+    @carriages = []
+    @current_station = nil
+    self.class.add_train(@number, self)
+    validate!
+    # register_instance
+  end
+
+  def increase_speed(speed)
+    @speed += speed
+  end
+
+  def stop
+    @speed = 0
+  end
+
+  def add_carriage(carriage)
+    validate_speed!
+    @carriages << carriage
+  end
+
+  def delete_carriage
+    validate_speed!
+    validate_carriage!
+    @carriages.delete(@carriages.last)
+  end
+
+  def each_carriage
+    @carriages.each.with_index(1) { |carriage, index| yield(carriage, index) }
+  end
+
+  def add_route(route)
+    @route = route
+    route.stations.first.add_train(self)
+  end
+
+  def current_station_set(station)
+    @current_station = station
+  end
+
+  def go_forward
+    validate_route!
+    raise "You're on a last station" unless next_station
+
+    next_station_index = current_station_index + 1
+    @current_station.send_train(self, @route.stations[next_station_index])
+    # puts "Поезд перемещен на станцию: #{self.current_station.name}"
+  end
+
+  def go_back
+    validate_route!
+    raise "You're on a first station" unless previous_station
+
+    next_station_index = current_station_index - 1
+    @current_station.send_train(self, @route.stations[next_station_index])
+    # puts "Поезд перемещен на станцию: #{self.current_station.name}"
+  end
+
+  # методы, которые используются внутри самого класса или его наследников
+  protected
+
+  attr_reader :current_station, :speed
+  attr_writer :type
+
+  def validate_route!
+    raise "You don't have a route" unless @route
+  end
+
+  def validate_speed!
+    raise 'Please, stop train!' unless @speed.zero?
+  end
+
+  def validate_carriage!
+    raise 'Train is empty!' if @carriages.empty?
+  end
+
+  def current_station_index
+    @route.stations.index(@current_station)
+  end
+
+  def previous_station
+    return nil if @current_station == @route.stations.first
+
+    @route.stations[current_station_index - 1]
+  end
+
+  def next_station
+    return nil if @current_station == @route.stations.last
+
+    @route.stations[current_station_index + 1]
+  end
+end
