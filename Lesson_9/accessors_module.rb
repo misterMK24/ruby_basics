@@ -5,9 +5,9 @@ module Accessors
       var_arr_history = "@#{name}_history".to_sym
       define_method(name) { instance_variable_get(var_name) }
       define_method("#{name}=".to_sym) do |value|
-        instance_variable_set(var_name, value)
         instance_variable_set(var_arr_history, []) if instance_variable_get(var_arr_history).nil?
-        instance_variable_get(var_arr_history).push(value)
+        instance_variable_get(var_arr_history).push(instance_variable_get(var_name))
+        instance_variable_set(var_name, value)
       end
       define_method("#{name}_history") { instance_variable_get(var_arr_history) }
     end
